@@ -1,94 +1,98 @@
 #include "table.h"
-#include <string>
+#include "cell.h"
 
 Table::Table(const std::vector<std::string>& headers)
 {
     for(size_t i = 0; i < headers.size(); i++)
     {
-        this->headers.insert({headers[i], i});
+        this->_headers.insert({headers[i], i});
+        _orderedHeaders.push_back(headers[i]);
     }
 }
 
-void Table::insertRow(int rowNumber, const std::vector<int>& row)
+
+void Table::setValue(int column, int row, std::string value)
 {
-    if(row.size() == headers.size())
+    auto innerRowPos = _rowNumbers.find(row);
+
+    if(innerRowPos != _rowNumbers.end())
     {
-        addRow(rowNumber);
-        auto rowCells = cells.find(rowNumber);
-
-        for(size_t i = 0; i < row.size(); i++)
+        int innerRow = innerRowPos->second;
+        if((size_t)column < _headers.size())
         {
-            rowCells->second[i] = row[i];
-        }
-
-        orderedRowNumbers.push_back(rowNumber);
-    }
-}
-
-void Table::setValue(int column, int row, int value)
-{
-    auto rowCells = cells.find(row);
-
-    if(rowCells != cells.end())
-    {
-        if((size_t)column < rowCells->second.size())
-        {
-            rowCells->second[column] = value;
+            Table t({""});
+            _cells[innerRow][column] = Cell(*this, value);
         }
     }
 }
 
-void Table::setValue(const std::string& column, int row, int value)
+void Table::setValue(const std::string& column, int row, std::string value)
 {
-    auto header = headers.find(column);
+    auto header = _headers.find(column);
 
-    if(header != headers.end())
+    if(header != _headers.end())
     {
         setValue(header->second, row, value);
     }
 }
 
-void Table::addRow(int rowNumber)
+void Table::addRow(int rowNumber, const std::vector<std::string>& values)
 {
-    cells.insert({rowNumber, std::vector<int>(headers.size())});
+    if(_rowNumbers.find(rowNumber) == _rowNumbers.end())
+    {
+        auto cellRow = std::vector<Cell>(_headers.size());
+        for(size_t i = 0; i < values.size(); i++)
+        {
+            cellRow[i] = Cell(*this, values[i]);
+        }
+        _cells.push_back(cellRow);
+
+        _rowNumbers.insert({rowNumber, _cells.size() - 1});
+        _orderedRowNumbers.push_back(rowNumber);
+    }
 }
 
-std::vector<std::string> Table::getHeaders() const
+const std::vector<std::string>& Table::getHeaders() const
 {
-    std::vector<std::string> convertedHeaders(headers.size());
-
-    for(const auto& header : headers)
-    {
-        convertedHeaders[header.second] = header.first;
-    }
-
-    return convertedHeaders;
+    return _orderedHeaders;
 }
 
 const std::vector<int>& Table::getRowNumbers() const
 {
-    return orderedRowNumbers;
+    return _orderedRowNumbers;
 }
 
-int Table::getValue(const std::string& column, int row) const
+std::string Table::getValue(const std::string& column, int row) const
 {
-    auto header = headers.find(column);
+    auto header = _headers.find(column);
 
-    if(header != headers.end())
+    if(header != _headers.end())
     {
        return getValue(header->second, row);
     }
+
+    return "";
 }
 
-int Table::getValue(int column, int row) const
+std::string Table::getValue(int column, int row) const
 {
-    auto rowCells = cells.find(row);
+    auto innerRowPos = _rowNumbers.find(row);
 
-    if(rowCells != cells.end())
+    if(innerRowPos != _rowNumbers.end())
     {
-        if((size_t)column < rowCells->second.size())
+        int innerRow = innerRowPos->second;
+        if((size_t)column < _headers.size())
         {
-            return rowCells->second[column];
+            if(_cells[innerRow][column].isValid())
+            {
+                return std::to_string(_cells[innerRow][column].getValue());
+            }
+            else
+            {
+                return "#";
+            }
         }
     }
+
+    return "";
 }

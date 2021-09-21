@@ -1,16 +1,20 @@
 #include <iostream>
 #include "table.h"
+#include "cell.h"
+#include "utils.h"
 
 using namespace std;
 
 int main()
 {
     Table table({"a", "b", "c"});
-    table.insertRow(1, {1, 2, 3});
-    table.insertRow(10, {4, 5, 6});
-    table.insertRow(5, {7, 8, 9});
+    table.addRow(1, {"1", "2", "3"});
+    table.addRow(10, {"4", "5", "6"});
+    table.addRow(5, {"7", "8", "9"});
 
-    table.setValue("b", 10, 35);
+    table.setValue("b", 10, "35");
+
+    Cell c(table, "");
 
     auto headers = table.getHeaders();
     auto rowNumbers = table.getRowNumbers();
