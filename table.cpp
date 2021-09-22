@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include "utils.h"
+#include "errors.h"
 
 const std::regex Table::headerValidator = std::regex("^\\s*" + cellHeaderRegExp + + "\\s*$");
 const std::regex Table::numberValidator = std::regex("^\\s*" + cellNumberRegExp + + "\\s*$");
@@ -17,6 +18,10 @@ Table::Table(const std::vector<std::string>& headers)
 
             this->_headers.insert({header, i});
             _orderedHeaders.push_back(header);
+        }
+        else
+        {
+            throw WrongHeaderFormatError;
         }
     }
 }
@@ -35,6 +40,10 @@ void Table::setValue(int column, int row, std::string value)
             _cells[innerRow][column] = Cell(*this, value);
         }
     }
+    else
+    {
+        throw NonexistentRowNumberError;
+    }
 }
 
 void Table::setValue(const std::string& column, int row, std::string value)
@@ -45,6 +54,10 @@ void Table::setValue(const std::string& column, int row, std::string value)
     {
         setValue(header->second, row, value);
     }
+    else
+    {
+        throw NonexistentHeaderError;
+    }
 }
 
 void Table::addRow(const std::string& rowNumberStr, const std::vector<std::string>& values)
@@ -54,16 +67,31 @@ void Table::addRow(const std::string& rowNumberStr, const std::vector<std::strin
         int rowNumber = std::stoi(rowNumberStr);
         if(_rowNumbers.find(rowNumber) == _rowNumbers.end())
         {
-            std::vector<Cell> cellRow;
-            for(const auto& value : values)
+            if(values.size() == _orderedHeaders.size())
             {
-                cellRow.push_back(Cell(*this, value));
-            }
-            _cells.push_back(cellRow);
+                std::vector<Cell> cellRow;
+                for(const auto& value : values)
+                {
+                    cellRow.push_back(Cell(*this, value));
+                }
+                _cells.push_back(cellRow);
 
-            _rowNumbers.insert({rowNumber, _cells.size() - 1});
-            _orderedRowNumbers.push_back(rowNumber);
+                _rowNumbers.insert({rowNumber, _cells.size() - 1});
+                _orderedRowNumbers.push_back(rowNumber);
+            }
+            else
+            {
+                throw WrongRowSizeError;
+            }
         }
+        else
+        {
+            throw NonexistentRowNumberError;
+        }
+    }
+    else
+    {
+        throw WrongRowNumberFormatError;
     }
 }
 
@@ -85,6 +113,10 @@ const std::vector<Cell>& Table::getRow(int row) const
     {
         return _cells[innerRowPos->second];
     }
+    else
+    {
+        throw NonexistentRowNumberError;
+    }
 }
 
 Cell Table::getCell(const std::string& column, int row) const
@@ -94,6 +126,11 @@ Cell Table::getCell(const std::string& column, int row) const
     if(header != _headers.end())
     {
        return getCell(header->second, row);
+    }
+
+    else
+    {
+        throw NonexistentHeaderError;
     }
 
     return Cell();
@@ -110,6 +147,10 @@ Cell Table::getCell(int column, int row) const
         {
             return _cells[innerRow][column];
         }
+    }
+    else
+    {
+        throw NonexistentRowNumberError;
     }
 
     return Cell();

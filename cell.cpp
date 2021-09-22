@@ -1,6 +1,7 @@
 #include "cell.h"
 #include "utils.h"
 #include "table.h"
+#include "errors.h"
 
 const std::regex Cell::intValidator = std::regex("^\\s*" + intRegExp + + "\\s*$");
 const std::regex Cell::expressionValidator = std::regex("^\\s*=" + argumentRegExp + operatorRegExp +
