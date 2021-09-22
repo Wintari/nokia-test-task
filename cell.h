@@ -21,6 +21,7 @@ public:
 
     int getValue() const;
     bool isValid() const;
+    std::string toStr() const;
 };
 
 #endif // CELL_H

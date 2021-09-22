@@ -1,25 +1,23 @@
 #include <iostream>
+#include <fstream>
 #include "table.h"
-#include "cell.h"
-#include "utils.h"
+#include "csvio.h"
 
 using namespace std;
 
-int main()
+int main(int argc, char* argv[])
 {
-    Table table({"a", "b", "c"});
-    table.addRow(1, {"1", "2", "3"});
-    table.addRow(10, {"4", "5", "6"});
-    table.addRow(5, {"7", "8", "9"});
+    if(argc == 1)
+    {
+        std::ifstream file(argv[1]);
 
-    table.setValue("b", 10, "35");
+        CsvReader reader;
+        CsvWriter writer;
 
-    Cell c(table, "");
+        Table table = reader.readCsvTable(file);
 
-    auto headers = table.getHeaders();
-    auto rowNumbers = table.getRowNumbers();
-
-    auto value = table.getValue(headers[1], rowNumbers[1]);
+        writer.writeCsvTable(std::cout, table);
+    }
 
     return 0;
 }

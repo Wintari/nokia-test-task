@@ -3,7 +3,7 @@
 #include "table.h"
 
 const std::regex Cell::intValidator = std::regex("^\\s*" + intRegExp + + "\\s*$");
-const std::regex Cell::expressionValidator = std::regex("^\\s*" + argumentRegExp + operatorRegExp +
+const std::regex Cell::expressionValidator = std::regex("^\\s*=" + argumentRegExp + operatorRegExp +
                                                         argumentRegExp + "\\s*$");
 
 Cell::Cell(const Table& table, const std::string& value)
@@ -28,4 +28,14 @@ int Cell::getValue() const
 bool Cell::isValid() const
 {
     return _isValid;
+}
+
+std::string Cell::toStr() const
+{
+    if(_isValid)
+    {
+        return std::to_string(_value);
+    }
+
+    return "#ERROR#";
 }
