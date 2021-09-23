@@ -4,15 +4,15 @@
 #include "utils.h"
 #include "errors.h"
 
-const std::regex Table::headerValidator = std::regex("^\\s*" + cellHeaderRegExp + + "\\s*$");
-const std::regex Table::numberValidator = std::regex("^\\s*" + cellNumberRegExp + + "\\s*$");
+const std::regex Table::_headerValidator = std::regex("^\\s*" + cellHeaderRegExp + + "\\s*$");
+const std::regex Table::_numberValidator = std::regex("^\\s*" + cellNumberRegExp + + "\\s*$");
 
-Table::Table(const std::vector<std::string>& headers)
+Table::Table(const std::vector<std::string>& headers) : _expressionHandler(this)
 {
     for(size_t i = 0; i < headers.size(); i++)
     {
         std::string header = headers[i];
-        if(std::regex_match(header, headerValidator))
+        if(std::regex_match(header, _headerValidator))
         {
             header.erase(std::remove_if(header.begin(), header.end(), isspace), header.end());
 
@@ -27,7 +27,7 @@ Table::Table(const std::vector<std::string>& headers)
 }
 
 
-void Table::setValue(int column, int row, std::string value)
+void Table::setValue(int column, int row, const std::string& value)
 {
     auto innerRowPos = _rowNumbers.find(row);
 
@@ -36,8 +36,7 @@ void Table::setValue(int column, int row, std::string value)
         int innerRow = innerRowPos->second;
         if((size_t)column < _headers.size())
         {
-            Table t({""});
-            _cells[innerRow][column] = Cell(*this, value);
+            _expressionHandler.handleWhenPossible(innerRow, column, value);
         }
     }
     else
@@ -46,7 +45,7 @@ void Table::setValue(int column, int row, std::string value)
     }
 }
 
-void Table::setValue(const std::string& column, int row, std::string value)
+void Table::setValue(const std::string& column, int row, const std::string& value)
 {
     auto header = _headers.find(column);
 
@@ -60,21 +59,29 @@ void Table::setValue(const std::string& column, int row, std::string value)
     }
 }
 
+void Table::setValueDirectly(int column, int row, int value)
+{
+    if(static_cast<size_t>(column) < _orderedHeaders.size() &&
+       static_cast<size_t>(row) < _cells.size())
+    {
+        _cells[row][column] = Cell(value);
+    }
+}
+
 void Table::addRow(const std::string& rowNumberStr, const std::vector<std::string>& values)
 {
-    if(std::regex_match(rowNumberStr, numberValidator))
+    if(std::regex_match(rowNumberStr, _numberValidator))
     {
         int rowNumber = std::stoi(rowNumberStr);
         if(_rowNumbers.find(rowNumber) == _rowNumbers.end())
         {
             if(values.size() == _orderedHeaders.size())
             {
-                std::vector<Cell> cellRow;
-                for(const auto& value : values)
+                _cells.push_back(std::vector<Cell>(values.size()));
+                for(size_t i = 0; i < values.size(); i++)
                 {
-                    cellRow.push_back(Cell(*this, value));
+                    _expressionHandler.handleWhenPossible(i, _cells.size() - 1, values[i]);
                 }
-                _cells.push_back(cellRow);
 
                 _rowNumbers.insert({rowNumber, _cells.size() - 1});
                 _orderedRowNumbers.push_back(rowNumber);
@@ -154,4 +161,9 @@ Cell Table::getCell(int column, int row) const
     }
 
     return Cell();
+}
+
+void Table::calculateExpressions()
+{
+    _expressionHandler.handleAll();
 }

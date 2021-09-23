@@ -1,24 +1,11 @@
 #include "cell.h"
-#include "utils.h"
 #include "table.h"
 #include "errors.h"
 
-const std::regex Cell::intValidator = std::regex("^\\s*" + intRegExp + + "\\s*$");
-const std::regex Cell::expressionValidator = std::regex("^\\s*=" + argumentRegExp + operatorRegExp +
-                                                        argumentRegExp + "\\s*$");
-
-Cell::Cell(const Table& table, const std::string& value)
+Cell::Cell(int value)
 {
-
-    if(std::regex_match(value, intValidator))
-    {
-        _value = std::stoi(value);
-        _isValid = true;
-    }
-    else if(std::regex_match(value, expressionValidator))
-    {
-        _isValid = false;
-    }
+    _value = value;
+    _isValid = true;
 }
 
 int Cell::getValue() const

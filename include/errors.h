@@ -15,6 +15,9 @@ static const std::string IdenticRowNumbersError("Identic row numbers was found."
 static const std::string NonexistentHeaderError("Header didn't exist.");
 static const std::string NonexistentRowNumberError("Row number didn't exist.");
 
-static const std::string wrongCellDataError("Wrong cell data format.");
+static const std::string WrongCellDataError("Wrong cell data format.");
+static const std::string DivisionByNullError("Division by null was found.");
+
+static const std::string ExpressionLoopError("Seems like there loop in the expressions.");
 
 #endif // ERRORS_H

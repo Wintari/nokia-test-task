@@ -12,13 +12,15 @@ int main(int argc, char* argv[])
     {
         if(argc == 1)
         {
-            std::ifstream file(/*argv[1]*/ "D:/work/nokia-test-task/tests/1.csv");
+            std::ifstream file(argv[1]);
             if(file.is_open())
             {
                 CsvReader reader;
                 CsvWriter writer;
 
                 Table table = reader.readCsvTable(file);
+
+                table.calculateExpressions();
 
                 writer.writeCsvTable(std::cout, table);
 
