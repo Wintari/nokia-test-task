@@ -16,8 +16,15 @@ Table::Table(const std::vector<std::string>& headers) : _expressionHandler(this)
         {
             header.erase(std::remove_if(header.begin(), header.end(), isspace), header.end());
 
-            this->_headers.insert({header, i});
-            _orderedHeaders.push_back(header);
+            if(_headers.find(header) == _headers.end())
+            {
+                _headers.insert({header, i});
+                _orderedHeaders.push_back(header);
+            }
+            else
+            {
+                throw  IdenticHeadersError;
+            }
         }
         else
         {
@@ -93,7 +100,7 @@ void Table::addRow(const std::string& rowNumberStr, const std::vector<std::strin
         }
         else
         {
-            throw NonexistentRowNumberError;
+            throw IdenticRowNumbersError;
         }
     }
     else

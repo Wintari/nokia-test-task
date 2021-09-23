@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
 {
     try
     {
-        if(argc == 1)
+        if(argc >= 2)
         {
             std::ifstream file(argv[1]);
             if(file.is_open())
